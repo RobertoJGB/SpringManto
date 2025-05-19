@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Manto - Login</title>
+</head>
+
+<body>
+
+    <div th:if="${erro}" style="color: red; margin-bottom: 10px;">
+        <p th:text="${erro}"></p>
+    </div>
+
+    <a href="/"
+        style="display: inline-block; padding: 8px 16px; background-color: #007BFF; color: white; text-decoration: none; border-radius: 4px;"
+        >
+        Voltar à loja
+    </a>
+
+    <form th:action="@{/login}" method="post">
+        <input type="text" name="username" placeholder="Email">
+        <input type="password" name="password" placeholder="Senha">
+        <button type="submit">Entrar</button>
+    </form>
+
+  <form th:action="@{/cadastro}" method="post">
+    <input type="text" name="name" id="name" placeholder="Nome" required />
+    <input type="text" name="email" id="email" placeholder="Email" required />
+    <input type="password" name="password" id="password" placeholder="Senha" required />
+    <input type="password" name="confirmPassword" id="confirmPassword" placeholder="Confirmar Senha" required />
+    <select name="userRole" required>
+        <option value="ROLE_BUYER">Comprador</option>
+        <option value="ROLE_SELLER">Vendedor</option>
+    </select>
+    <button type="submit">Cadastrar</button>
+</form>
+</body>
+
+</html>

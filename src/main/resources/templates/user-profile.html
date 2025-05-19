@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Perfil do Usuário</title>
+    <style>
+        /* Estilo simples para modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.4);
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 10% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 300px;
+            border-radius: 4px;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 20px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close:hover {
+            color: black;
+        }
+
+        label,
+        input {
+            display: block;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+
+        input[type=password] {
+            padding: 5px;
+            box-sizing: border-box;
+        }
+
+        button {
+            padding: 6px 12px;
+            cursor: pointer;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th,
+        td {
+            padding: 8px;
+            border: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Meu Perfil</h1>
+
+    <div th:if="${errorMessage}">
+        <p th:text="${errorMessage}" style="color: red;"></p>
+    </div>
+    <div th:if="${successMessage}">
+        <p th:text="${successMessage}" style="color: green;"></p>
+    </div>
+
+    <div th:if="${user}">
+        <p><strong>Nome:</strong> <span th:text="${user.name}">Nome</span></p>
+        <p><strong>Email:</strong> <span th:text="${user.email}">Email</span></p>
+        <p><strong>Função:</strong>
+            <span th:text="${user.userRole.name() == 'ROLE_SELLER' ? 'Vendedor' : 'Comprador'}">Função</span>
+        </p>
+
+        <div sec:authorize="hasRole('SELLER')">
+            <p><strong>Produtos cadastrados:</strong></p>
+            <ul>
+                <li th:each="product : ${user.products}">
+                    <a th:href="@{/products/myproduct/{slug}(slug=${product.slug})}"
+                        th:text="${product.nameProduct}">Nome do Produto</a>
+                </li>
+            </ul>
+        </div>
+
+        <button sec:authorize="hasRole('SELLER')"
+            style="display: inline-block; padding: 8px 16px; background-color: #007BFF; color: white; text-decoration: none; border-radius: 4px;"
+            onclick="window.location.href='/products/new-product'">
+            Criar produto
+        </button>
+
+
+     <!-- Pedidos do comprador -->
+<div sec:authorize="hasRole('BUYER')">
+    <h2>Meus Pedidos</h2>
+
+    <!-- Se houver pedidos -->
+    <div th:if="${not #lists.isEmpty(buyerOrderItems)}">
+        <table>
+            <thead>
+                <tr>
+                    <th>Código do Pedido</th>
+                    <th>Produto</th>
+                    <th>Quantidade</th>
+                    <th>Vendedor</th>
+                    <th>Status da Entrega</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="item : ${buyerOrderItems}">
+                    <td th:text="${item.order.orderId}">1</td>
+                    <td th:text="${item.product.nameProduct}">Produto</td>
+                    <td th:text="${item.quantity}">1</td>
+                    <td th:text="${item.order.seller.name}">Vendedor</td>
+                    <td th:text="${item.order.shipment != null and item.order.shipment.status != null ?
+                                   #strings.capitalize(item.order.shipment.status.name().toLowerCase()) : 'Indefinido'}">
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Se não houver pedidos -->
+    <div th:if="${#lists.isEmpty(buyerOrderItems)}">
+        <p>Você ainda não fez nenhum pedido.</p>
+    </div>
+</div>
+
+
+
+    <!-- Pedidos do vendedor -->
+    <div sec:authorize="hasRole('SELLER')" th:if="${sellerOrders != null}">
+        <h2>Pedidos Recebidos</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Código da venda</th>
+                    <th>Comprador</th>
+                    <th>Status da Entrega</th>
+                    <th>Atualizar Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="order : ${sellerOrders}">
+                    <td th:text="${order.orderId}">1</td>
+                    <td th:text="${order.buyer.name}">João</td>
+                    <td
+                        th:text="${order.shipment != null and order.shipment.status != null ? #strings.capitalize(order.shipment.status.name().toLowerCase()) : 'Indefinido'}">
+                    </td>
+
+
+                    <td>
+                        <form th:action="@{/shipments/update-status}" method="post">
+                            <input type="hidden" name="shipmentId" th:value="${order.shipment.id}" />
+                            <select name="status">
+                                <option th:each="status : ${T(br.com.orlands.manto.domain.enuns.Status).values()}"
+                                    th:value="${status}" th:text="${#strings.capitalize(status.name().toLowerCase())}"
+                                    th:selected="${status.equals(order.shipment.status)}">
+                                </option>
+                            </select>
+                            <button type="submit">Atualizar</button>
+                        </form>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+
+    <!-- Modal apagar conta -->
+    <button id="btnOpenDeleteModal" style="margin-left: 10px; background-color: #e74c3c; color: white;">Apagar
+        Conta</button>
+
+    <div id="deleteModal" class="modal">
+        <div class="modal-content">
+            <span class="close" id="btnCloseDeleteModal">&times;</span>
+            <h3>Confirmar exclusão</h3>
+            <p>Tem certeza que deseja apagar sua conta? Esta ação não pode ser desfeita.</p>
+            <form th:action="@{/user/delete-account}" method="post">
+                <button type="submit" style="background-color: #e74c3c; color: white;">Sim, apagar minha
+                    conta</button>
+                <button type="button" id="btnCancelDelete">Cancelar</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal mudar senha -->
+    <button id="btnOpenModal">Mudar Senha</button>
+    </div>
+
+    <div id="passwordModal" class="modal">
+        <div class="modal-content">
+            <span class="close" id="btnCloseModal">&times;</span>
+            <h3>Mudar Senha</h3>
+            <form th:action="@{/user/change-password}" method="post">
+                <label for="newPassword">Nova senha:</label>
+                <input type="password" id="newPassword" name="newPassword" />
+
+                <label for="confirmPassword">Confirmar nova senha:</label>
+                <input type="password" id="confirmPassword" name="confirmPassword" />
+
+                <button type="submit">Salvar</button>
+            </form>
+        </div>
+    </div>
+
+    <div>
+        <a th:href="@{/}">Voltar à loja</a> |
+        <a th:href="@{/logout}">Sair</a>
+    </div>
+
+    <!-- Scripts -->
+    <script>
+        // Modal mudar senha
+        const modal = document.getElementById("passwordModal");
+        const btnOpen = document.getElementById("btnOpenModal");
+        const btnClose = document.getElementById("btnCloseModal");
+
+        btnOpen.onclick = () => { modal.style.display = "block"; }
+        btnClose.onclick = () => { modal.style.display = "none"; }
+
+        // Modal apagar conta
+        const deleteModal = document.getElementById("deleteModal");
+        const btnOpenDelete = document.getElementById("btnOpenDeleteModal");
+        const btnCloseDelete = document.getElementById("btnCloseDeleteModal");
+        const btnCancelDelete = document.getElementById("btnCancelDelete");
+
+        btnOpenDelete.onclick = () => { deleteModal.style.display = "block"; }
+        btnCloseDelete.onclick = () => { deleteModal.style.display = "none"; }
+        btnCancelDelete.onclick = () => { deleteModal.style.display = "none"; }
+
+        // Clique fora do modal
+        window.onclick = (event) => {
+            if (event.target === modal) {
+                modal.style.display = "none";
+            }
+            if (event.target === deleteModal) {
+                deleteModal.style.display = "none";
+            }
+        }
+    </script>
+
+
+</body>
+
+</html>

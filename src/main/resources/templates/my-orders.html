@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pedido</title>
+</head>
+
+<body>
+        <button
+        style="display: inline-block; padding: 8px 16px; background-color: #007BFF; color: white; text-decoration: none; border-radius: 4px;"
+        sec:authorize="isAuthenticated()" onclick="window.location.href='/user/profile'">
+        Meu Perfil
+    </button>
+
+    <a href="/"
+        style="display: inline-block; padding: 8px 16px; background-color: #007BFF; color: white; text-decoration: none; border-radius: 4px;">
+        Voltar à loja
+    </a>
+
+    <h1>Pedido finalizado</h1>
+
+    <table>
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Vendedor</th>
+                <th>Total</th>
+                <th>Itens</th>
+                <th>Status do Envio</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="order : ${orders}">
+                <td th:text="${order.orderId}"></td>
+                <td th:text="${order.seller.name}"></td>
+                <td>R$ <span th:text="${order.total}"></span></td>
+                <td>
+                    <ul>
+                        <li th:each="item : ${order.orderItems}">
+                            <span th:text="${item.quantity}"></span>x
+                            <span th:text="${item.product.nameProduct}"></span> -
+                            R$ <span th:text="${item.price}"></span>
+                        </li>
+                    </ul>
+                </td>
+                <td th:text="${order.shipment != null ? order.shipment.status : 'Não enviado'}"></td>
+            </tr>
+        </tbody>
+    </table>
+
+
+
+
+</body>
+
+</html>

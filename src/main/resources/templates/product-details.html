@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="'Detalhes '+${product.nameProduct}">Produto detalhado</title>
+
+</head>
+
+<body>
+    <button
+        style="display: inline-block; padding: 8px 16px; background-color: #007BFF; color: white; text-decoration: none; border-radius: 4px;"
+        sec:authorize="isAuthenticated()" onclick="window.location.href='/user/profile'">
+        Meu Perfil
+    </button>
+
+    <a href="/"
+        style="display: inline-block; padding: 8px 16px; background-color: #007BFF; color: white; text-decoration: none; border-radius: 4px;">
+        Voltar à loja
+    </a>
+
+
+    <h1 th:text="${product.nameProduct}">Nome do Produto</h1>
+
+    <img th:src="@{${product.imageUrl}}" alt="Imagem do produto" />
+
+    <p>Descrição: <span th:text="${product.description}">Descrição do produto</span></p>
+    <p>Preço: R$ <span th:text="${product.price}">0.00</span></p>
+    <p>Quantidade disponível: <span th:text="${product.quantity}">0</span></p>
+
+    <form th:action="@{/orders/create}" method="post">
+        <input type="hidden" name="productId" th:value="${product.id}" />
+        <input type="number" name="quantity" value="1" min="1" th:attr="max=${product.quantity}" required />
+
+        <button type="submit">Comprar agora</button>
+    </form>
+
+
+
+    <h2>Avaliações</h2>
+    <div th:if="${#lists.isEmpty(reviews)}">
+        <p>Este produto ainda não possui avaliações.</p>
+    </div>
+
+    <ul th:if="${not #lists.isEmpty(reviews)}">
+        <li th:each="review : ${reviews}">
+            <strong th:text="${review.user.name}">Usuário</strong>:
+            <span th:text="'Nota: ' + ${review.rating} + ' - ' + ${review.comment}">Comentário</span>
+        </li>
+    </ul>
+
+
+    <!-- Botão que abre o modal -->
+    <button onclick="openReviewModal()"
+        style="margin-top: 10px; padding: 8px 16px; background-color: green; color: white; border: none; border-radius: 4px;">
+        Adicionar Avaliação
+    </button>
+
+    <!-- Modal -->
+    <div id="reviewModal"
+        style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background-color:rgba(0,0,0,0.6); z-index:1000;">
+        <div
+            style="background:white; margin:10% auto; padding:20px; width:90%; max-width:500px; border-radius:8px; position:relative;">
+            <span onclick="closeReviewModal()"
+                style="position:absolute; top:10px; right:15px; font-size:24px; cursor:pointer;">&times;</span>
+            <h2>Avaliar Produto</h2>
+            <form th:action="@{/reviews/create}" method="post">
+                <input type="hidden" name="productId" th:value="${product.id}" />
+
+                <label for="rating">Nota (1 a 5):</label>
+                <input type="number" name="rating" min="1" max="5" required style="width: 100%; padding: 8px;" />
+
+                <label for="comment">Comentário:</label>
+                <textarea name="comment" required style="width: 100%; padding: 8px; height: 100px;"></textarea>
+
+                <br><br>
+                <button type="submit"
+                    style="background-color: #007BFF; color: white; padding: 10px 16px; border: none; border-radius: 4px;">
+                    Enviar Avaliação
+                </button>
+            </form>
+        </div>
+    </div>
+
+
+
+    
+
+
+</body>
+
+<script>
+    function openReviewModal() {
+        document.getElementById("reviewModal").style.display = "block";
+    }
+
+    function closeReviewModal() {
+        document.getElementById("reviewModal").style.display = "none";
+    }
+
+    // Fechar modal ao clicar fora da caixa
+    window.onclick = function (event) {
+        const modal = document.getElementById("reviewModal");
+        if (event.target === modal) {
+            closeReviewModal();
+        }
+    };
+</script>
+
+</html>
