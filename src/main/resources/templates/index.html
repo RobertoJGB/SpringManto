@@ -3,72 +3,123 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Home</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>The Manto - Home</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <style>
+        /* Estilos customizados para corrigir problemas específicos */
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        .container {
+            flex: 1;
+        }
+        .card-img-top {
+            background-color: #f8f9fa;
+        }
+        .navbar-brand {
+            font-weight: bold;
+            font-size: 1.5rem;
+        }
+    </style>
 </head>
 
-<body>
-    <div th:if="${param.logout}" id="msgLogout" style="color: green;">
-        Logout realizado com sucesso!
+<body class="bg-light">
+<!-- Container principal -->
+<div class="container">
+    <!-- Barra de navegação -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/">The Manto</a>
+            <div class="d-flex">
+                <form th:action="@{/logout}" method="post" class="me-2" sec:authorize="isAuthenticated()">
+                    <button type="submit" class="btn btn-outline-light">
+                        <i class="bi bi-box-arrow-right"></i> Sair
+                    </button>
+                </form>
+
+                <a href="/login" class="btn btn-light" sec:authorize="isAnonymous()">
+                    <i class="bi bi-box-arrow-in-right"></i> Login
+                </a>
+
+                <button class="btn btn-warning ms-2"
+                        sec:authorize="hasRole('SELLER')"
+                        onclick="window.location.href='/products/new-product'">
+                    <i class="bi bi-plus-circle"></i> Criar produto
+                </button>
+
+                <button class="btn btn-info ms-2 text-white"
+                        sec:authorize="isAuthenticated()"
+                        onclick="window.location.href='/user/profile'">
+                    <i class="bi bi-person"></i> Perfil
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Conteúdo principal -->
+    <main>
+        <!-- Mensagem de logout -->
+        <div th:if="${param.logout}" id="msgLogout" class="alert alert-success alert-dismissible fade show">
+            Logout realizado com sucesso!
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <!-- Título e lista de produtos -->
+        <h1 class="mb-4 text-center">Todos os Produtos</h1>
+
+        <div th:if="${products.isEmpty()}" class="alert alert-info">
+            <i class="bi bi-info-circle"></i> Nenhum produto disponível no momento.
+        </div>
+
+        <!-- Grid de produtos -->
+        <div class="row row-cols-1 row-cols-md-3 g-4">
+            <div th:each="product : ${products}" class="col">
+                <div class="card h-100 shadow-sm">
+                    <div class="text-center p-3" style="height: 200px; background-color: #f8f9fa;">
+                        <img th:src="@{${product.imageUrl}}"
+                             class="img-fluid h-100"
+                             alt="Imagem do produto"
+                             style="object-fit: contain;">
+                    </div>
+                    <div class="card-body">
+                        <h5 class="card-title" th:text="${product.nameProduct}"></h5>
+                        <p class="card-text text-success fw-bold">
+                            R$ <span th:text="${#numbers.formatDecimal(product.price, 1, 2, 'COMMA')}"></span>
+                        </p>
+                    </div>
+                    <div class="card-footer bg-white">
+                        <a th:href="@{'/products/' + ${product.slug}}"
+                           class="btn btn-primary w-100">
+                            Ver detalhes
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<!-- Rodapé -->
+<footer class="bg-dark text-white py-3 mt-auto">
+    <div class="container text-center">
+        <p class="mb-0">© 2025 The Manto - Todos os direitos reservados</p>
     </div>
+</footer>
 
-    <form th:action="@{/logout}" method="post" style="display: inline;" sec:authorize="isAuthenticated()">
-        <button type="submit"
-            style="background: none; border: none; color: #007BFF; text-decoration: underline; cursor: pointer; padding: 0; font: inherit;">
-            Sair
-        </button>
-    </form>
-    
-
-    <a href="/login"
-        style="display: inline-block; padding: 8px 16px; background-color: #007BFF; color: white; text-decoration: none; border-radius: 4px;"
-        sec:authorize="isAnonymous()">
-        Login
-    </a>
-
-    
-    <button
-        style="display: inline-block; padding: 8px 16px; background-color: #007BFF; color: white; text-decoration: none; border-radius: 4px;"
-        sec:authorize="hasRole('SELLER')" onclick="window.location.href='/products/new-product'">
-        Criar produto
-    </button>
-
-    <button
-        style="display: inline-block; padding: 8px 16px; background-color: #007BFF; color: white; text-decoration: none; border-radius: 4px;"
-        sec:authorize="isAuthenticated()" onclick="window.location.href='/user/profile'">
-        Meu Perfil
-    </button>
-
-
-
-
-    <h1>Todos os Produtos</h1>
-
-    <div th:if="${products.isEmpty()}">
-        <p>Nenhum produto disponível.</p>
-    </div>
-
-    <div th:each="product : ${products}">
-        <h3 th:text="${product.nameProduct}"></h3>
-        <p>Preço: R$ <span th:text="${product.price}"></span></p>
-        <img th:src="@{${product.imageUrl}}" alt="Imagem do produto" />
-         <a th:href="@{'/products/' + ${product.slug}}">Ver detalhes</a>
-
-
-
-        <hr />
-    </div>
-
-
-
-</body>
-
+<!-- Script do Bootstrap -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    setTimeout(function () {
+    setTimeout(function() {
         var msg = document.getElementById('msgLogout');
         if (msg) {
-            msg.style.display = 'none';
+            var alert = new bootstrap.Alert(msg);
+            alert.close();
         }
     }, 3000);
 </script>
-
+</body>
 </html>

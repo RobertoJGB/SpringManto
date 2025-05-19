@@ -3,262 +3,298 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Perfil do Usuário</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Manto - Meu Perfil</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
     <style>
-        /* Estilo simples para modal */
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
+        .profile-card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
+            padding: 2rem;
+        }
+        .role-badge {
+            font-size: 0.9rem;
+            padding: 0.35rem 0.75rem;
+        }
+        .seller-badge {
+            background-color: #f8f4e6;
+            color: #8a6d3b;
+        }
+        .buyer-badge {
+            background-color: #e6f4f8;
+            color: #31708f;
+        }
+        .product-list {
+            list-style: none;
+            padding-left: 0;
+        }
+        .product-list li {
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #eee;
+        }
+        .product-list li:last-child {
+            border-bottom: none;
+        }
+        .order-table th {
+            background-color: #f8f9fa;
+            position: sticky;
             top: 0;
-            width: 100%;
-            height: 100%;
-            overflow: auto;
-            background-color: rgba(0, 0, 0, 0.4);
         }
-
-        .modal-content {
-            background-color: #fefefe;
-            margin: 10% auto;
-            padding: 20px;
-            border: 1px solid #888;
-            width: 300px;
-            border-radius: 4px;
+        .status-pending {
+            color: #f39c12;
         }
-
-        .close {
-            color: #aaa;
-            float: right;
-            font-size: 20px;
-            font-weight: bold;
-            cursor: pointer;
+        .status-shipped {
+            color: #3498db;
         }
-
-        .close:hover {
-            color: black;
+        .status-delivered {
+            color: #2ecc71;
         }
-
-        label,
-        input {
-            display: block;
-            width: 100%;
-            margin-bottom: 10px;
-        }
-
-        input[type=password] {
-            padding: 5px;
-            box-sizing: border-box;
-        }
-
-        button {
-            padding: 6px 12px;
-            cursor: pointer;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-
-        th,
-        td {
-            padding: 8px;
-            border: 1px solid #ddd;
-        }
-
-        th {
-            background-color: #f2f2f2;
+        .status-cancelled {
+            color: #e74c3c;
         }
     </style>
 </head>
 
-<body>
-    <h1>Meu Perfil</h1>
-
-    <div th:if="${errorMessage}">
-        <p th:text="${errorMessage}" style="color: red;"></p>
+<body class="bg-light">
+<!-- Barra de navegação -->
+<nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm mb-4">
+    <div class="container">
+        <a class="navbar-brand" href="/">The Manto</a>
+        <div class="d-flex">
+            <a href="/" class="btn btn-outline-secondary me-2">
+                <i class="bi bi-arrow-left"></i> Voltar à loja
+            </a>
+            <form th:action="@{/logout}" method="post" class="d-inline">
+                <button type="submit" class="btn btn-outline-danger">
+                    <i class="bi bi-box-arrow-right"></i> Sair
+                </button>
+            </form>
+        </div>
     </div>
-    <div th:if="${successMessage}">
-        <p th:text="${successMessage}" style="color: green;"></p>
+</nav>
+
+<div class="container py-4">
+    <!-- Mensagens -->
+    <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show">
+        <span th:text="${errorMessage}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show">
+        <span th:text="${successMessage}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
 
-    <div th:if="${user}">
-        <p><strong>Nome:</strong> <span th:text="${user.name}">Nome</span></p>
-        <p><strong>Email:</strong> <span th:text="${user.email}">Email</span></p>
-        <p><strong>Função:</strong>
-            <span th:text="${user.userRole.name() == 'ROLE_SELLER' ? 'Vendedor' : 'Comprador'}">Função</span>
-        </p>
+    <!-- Card de perfil -->
+    <div class="profile-card mb-4">
+        <div class="row">
+            <div class="col-md-8">
+                <h1 class="mb-3">Meu Perfil</h1>
+                <div class="d-flex align-items-center mb-3">
+                    <h4 class="mb-0" th:text="${user.name}">Nome</h4>
+                    <span class="ms-3 badge role-badge"
+                          th:classappend="${user.userRole.name() == 'ROLE_SELLER'} ? 'seller-badge' : 'buyer-badge'"
+                          th:text="${user.userRole.name() == 'ROLE_SELLER'} ? 'Vendedor' : 'Comprador'">
+                        </span>
+                </div>
+                <p class="text-muted mb-4">
+                    <i class="bi bi-envelope"></i> <span th:text="${user.email}">Email</span>
+                </p>
 
-        <div sec:authorize="hasRole('SELLER')">
-            <p><strong>Produtos cadastrados:</strong></p>
-            <ul>
-                <li th:each="product : ${user.products}">
-                    <a th:href="@{/products/myproduct/{slug}(slug=${product.slug})}"
-                        th:text="${product.nameProduct}">Nome do Produto</a>
-                </li>
-            </ul>
+                <!-- Botões de ação -->
+                <div class="d-flex gap-2 mb-4">
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#passwordModal">
+                        <i class="bi bi-key"></i> Mudar Senha
+                    </button>
+                    <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                        <i class="bi bi-trash"></i> Apagar Conta
+                    </button>
+                </div>
+
+                <!-- Seção de produtos (vendedor) -->
+                <div sec:authorize="hasRole('SELLER')" class="mb-4">
+                    <h5 class="mb-3"><i class="bi bi-box-seam"></i> Meus Produtos</h5>
+                    <ul class="product-list" th:if="${not #lists.isEmpty(user.products)}">
+                        <li th:each="product : ${user.products}">
+                            <a th:href="@{/products/myproduct/{slug}(slug=${product.slug})}"
+                               th:text="${product.nameProduct}">Nome do Produto</a>
+                        </li>
+                    </ul>
+                    <p th:if="${#lists.isEmpty(user.products)}" class="text-muted">Você ainda não cadastrou produtos.</p>
+                    <a href="/products/new-product" class="btn btn-outline-primary mt-2">
+                        <i class="bi bi-plus-circle"></i> Criar produto
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Seção de pedidos -->
+    <div class="profile-card">
+        <!-- Pedidos do comprador -->
+        <div sec:authorize="hasRole('BUYER')">
+            <h2 class="mb-4"><i class="bi bi-cart-check"></i> Meus Pedidos</h2>
+
+            <div th:if="${not #lists.isEmpty(buyerOrderItems)}">
+                <div class="table-responsive">
+                    <table class="table order-table">
+                        <thead>
+                        <tr>
+                            <th>Código</th>
+                            <th>Produto</th>
+                            <th>Quantidade</th>
+                            <th>Vendedor</th>
+                            <th>Status</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="item : ${buyerOrderItems}">
+                            <td th:text="${item.order.orderId}">1</td>
+                            <td>
+                                <a th:href="@{'/products/' + ${item.product.slug}}"
+                                   th:text="${item.product.nameProduct}">Produto</a>
+                            </td>
+                            <td th:text="${item.quantity}">1</td>
+                            <td th:text="${item.order.seller.name}">Vendedor</td>
+                            <td>
+                                        <span th:if="${item.order.shipment != null and item.order.shipment.status != null}"
+                                              th:classappend="${'status-' + item.order.shipment.status.name().toLowerCase()}"
+                                              th:text="${#strings.capitalize(item.order.shipment.status.name().toLowerCase())}">
+                                        </span>
+                                <span th:if="${item.order.shipment == null or item.order.shipment.status == null}">
+                                            Indefinido
+                                        </span>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div th:if="${#lists.isEmpty(buyerOrderItems)}" class="alert alert-info">
+                <i class="bi bi-info-circle"></i> Você ainda não fez nenhum pedido.
+            </div>
         </div>
 
-        <button sec:authorize="hasRole('SELLER')"
-            style="display: inline-block; padding: 8px 16px; background-color: #007BFF; color: white; text-decoration: none; border-radius: 4px;"
-            onclick="window.location.href='/products/new-product'">
-            Criar produto
-        </button>
+        <!-- Pedidos do vendedor -->
+        <div sec:authorize="hasRole('SELLER')" th:if="${sellerOrders != null}">
+            <h2 class="mb-4"><i class="bi bi-truck"></i> Pedidos Recebidos</h2>
 
+            <div th:if="${not #lists.isEmpty(sellerOrders)}">
+                <div class="table-responsive">
+                    <table class="table order-table">
+                        <thead>
+                        <tr>
+                            <th>Código</th>
+                            <th>Comprador</th>
+                            <th>Status</th>
+                            <th>Ações</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="order : ${sellerOrders}">
+                            <td th:text="${order.orderId}">1</td>
+                            <td th:text="${order.buyer.name}">João</td>
+                            <td>
+                                        <span th:if="${order.shipment != null and order.shipment.status != null}"
+                                              th:classappend="${'status-' + order.shipment.status.name().toLowerCase()}"
+                                              th:text="${#strings.capitalize(order.shipment.status.name().toLowerCase())}">
+                                        </span>
+                                <span th:if="${order.shipment == null or order.shipment.status == null}">
+                                            Indefinido
+                                        </span>
+                            </td>
+                            <td>
+                                <form th:action="@{/shipments/update-status}" method="post" class="d-flex gap-2">
+                                    <input type="hidden" name="shipmentId" th:value="${order.shipment.id}" />
+                                    <select name="status" class="form-select form-select-sm">
+                                        <option th:each="status : ${T(br.com.orlands.manto.domain.enuns.Status).values()}"
+                                                th:value="${status}"
+                                                th:text="${#strings.capitalize(status.name().toLowerCase())}"
+                                                th:selected="${order.shipment != null and status.equals(order.shipment.status)}">
+                                        </option>
+                                    </select>
+                                    <button type="submit" class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-check"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
 
-     <!-- Pedidos do comprador -->
-<div sec:authorize="hasRole('BUYER')">
-    <h2>Meus Pedidos</h2>
-
-    <!-- Se houver pedidos -->
-    <div th:if="${not #lists.isEmpty(buyerOrderItems)}">
-        <table>
-            <thead>
-                <tr>
-                    <th>Código do Pedido</th>
-                    <th>Produto</th>
-                    <th>Quantidade</th>
-                    <th>Vendedor</th>
-                    <th>Status da Entrega</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr th:each="item : ${buyerOrderItems}">
-                    <td th:text="${item.order.orderId}">1</td>
-                    <td th:text="${item.product.nameProduct}">Produto</td>
-                    <td th:text="${item.quantity}">1</td>
-                    <td th:text="${item.order.seller.name}">Vendedor</td>
-                    <td th:text="${item.order.shipment != null and item.order.shipment.status != null ?
-                                   #strings.capitalize(item.order.shipment.status.name().toLowerCase()) : 'Indefinido'}">
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
-
-    <!-- Se não houver pedidos -->
-    <div th:if="${#lists.isEmpty(buyerOrderItems)}">
-        <p>Você ainda não fez nenhum pedido.</p>
+            <div th:if="${#lists.isEmpty(sellerOrders)}" class="alert alert-info">
+                <i class="bi bi-info-circle"></i> Você ainda não recebeu pedidos.
+            </div>
+        </div>
     </div>
 </div>
 
-
-
-    <!-- Pedidos do vendedor -->
-    <div sec:authorize="hasRole('SELLER')" th:if="${sellerOrders != null}">
-        <h2>Pedidos Recebidos</h2>
-        <table>
-            <thead>
-                <tr>
-                    <th>Código da venda</th>
-                    <th>Comprador</th>
-                    <th>Status da Entrega</th>
-                    <th>Atualizar Status</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr th:each="order : ${sellerOrders}">
-                    <td th:text="${order.orderId}">1</td>
-                    <td th:text="${order.buyer.name}">João</td>
-                    <td
-                        th:text="${order.shipment != null and order.shipment.status != null ? #strings.capitalize(order.shipment.status.name().toLowerCase()) : 'Indefinido'}">
-                    </td>
-
-
-                    <td>
-                        <form th:action="@{/shipments/update-status}" method="post">
-                            <input type="hidden" name="shipmentId" th:value="${order.shipment.id}" />
-                            <select name="status">
-                                <option th:each="status : ${T(br.com.orlands.manto.domain.enuns.Status).values()}"
-                                    th:value="${status}" th:text="${#strings.capitalize(status.name().toLowerCase())}"
-                                    th:selected="${status.equals(order.shipment.status)}">
-                                </option>
-                            </select>
-                            <button type="submit">Atualizar</button>
-                        </form>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
-
-
-    <!-- Modal apagar conta -->
-    <button id="btnOpenDeleteModal" style="margin-left: 10px; background-color: #e74c3c; color: white;">Apagar
-        Conta</button>
-
-    <div id="deleteModal" class="modal">
+<!-- Modal de mudança de senha -->
+<div class="modal fade" id="passwordModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
         <div class="modal-content">
-            <span class="close" id="btnCloseDeleteModal">&times;</span>
-            <h3>Confirmar exclusão</h3>
-            <p>Tem certeza que deseja apagar sua conta? Esta ação não pode ser desfeita.</p>
-            <form th:action="@{/user/delete-account}" method="post">
-                <button type="submit" style="background-color: #e74c3c; color: white;">Sim, apagar minha
-                    conta</button>
-                <button type="button" id="btnCancelDelete">Cancelar</button>
-            </form>
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="bi bi-key"></i> Mudar Senha</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form th:action="@{/user/change-password}" method="post">
+                    <div class="mb-3">
+                        <label for="newPassword" class="form-label">Nova senha:</label>
+                        <input type="password" class="form-control" id="newPassword" name="newPassword" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="confirmPassword" class="form-label">Confirmar nova senha:</label>
+                        <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" required>
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-save"></i> Salvar
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
+</div>
 
-    <!-- Modal mudar senha -->
-    <button id="btnOpenModal">Mudar Senha</button>
-    </div>
-
-    <div id="passwordModal" class="modal">
+<!-- Modal de exclusão de conta -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
         <div class="modal-content">
-            <span class="close" id="btnCloseModal">&times;</span>
-            <h3>Mudar Senha</h3>
-            <form th:action="@{/user/change-password}" method="post">
-                <label for="newPassword">Nova senha:</label>
-                <input type="password" id="newPassword" name="newPassword" />
-
-                <label for="confirmPassword">Confirmar nova senha:</label>
-                <input type="password" id="confirmPassword" name="confirmPassword" />
-
-                <button type="submit">Salvar</button>
-            </form>
+            <div class="modal-header">
+                <h5 class="modal-title text-danger"><i class="bi bi-exclamation-triangle"></i> Confirmar exclusão</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Tem certeza que deseja apagar sua conta? Esta ação não pode ser desfeita e todos os seus dados serão permanentemente removidos.</p>
+                <form th:action="@{/user/delete-account}" method="post">
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-danger flex-grow-1">
+                            <i class="bi bi-trash"></i> Sim, apagar minha conta
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                            Cancelar
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
+</div>
 
-    <div>
-        <a th:href="@{/}">Voltar à loja</a> |
-        <a th:href="@{/logout}">Sair</a>
+<!-- Rodapé -->
+<footer class="bg-dark text-white py-4 mt-5">
+    <div class="container text-center">
+        <p class="mb-0">© 2025 The Manto - Todos os direitos reservados</p>
     </div>
+</footer>
 
-    <!-- Scripts -->
-    <script>
-        // Modal mudar senha
-        const modal = document.getElementById("passwordModal");
-        const btnOpen = document.getElementById("btnOpenModal");
-        const btnClose = document.getElementById("btnCloseModal");
-
-        btnOpen.onclick = () => { modal.style.display = "block"; }
-        btnClose.onclick = () => { modal.style.display = "none"; }
-
-        // Modal apagar conta
-        const deleteModal = document.getElementById("deleteModal");
-        const btnOpenDelete = document.getElementById("btnOpenDeleteModal");
-        const btnCloseDelete = document.getElementById("btnCloseDeleteModal");
-        const btnCancelDelete = document.getElementById("btnCancelDelete");
-
-        btnOpenDelete.onclick = () => { deleteModal.style.display = "block"; }
-        btnCloseDelete.onclick = () => { deleteModal.style.display = "none"; }
-        btnCancelDelete.onclick = () => { deleteModal.style.display = "none"; }
-
-        // Clique fora do modal
-        window.onclick = (event) => {
-            if (event.target === modal) {
-                modal.style.display = "none";
-            }
-            if (event.target === deleteModal) {
-                deleteModal.style.display = "none";
-            }
-        }
-    </script>
-
-
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
-
 </html>
