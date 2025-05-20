@@ -24,22 +24,22 @@ public class LoginController {
     }
 
     @PostMapping("/cadastro")
-public String cadastrar(@ModelAttribute UserDomain user,
-                       @RequestParam("confirmPassword") String confirmPassword,
-                       Model model) {
-    if (userService.findByEmail(user.getEmail()).isPresent()) {
-        model.addAttribute("erro", "Email já cadastrado.");
-        return "/login";
-    }
-    
-    if (!user.getPassword().equals(confirmPassword)) {
-        model.addAttribute("erro", "As senhas não conferem.");
-        return "/login";
-    }
+    public String cadastrar(@ModelAttribute UserDomain user,
+            @RequestParam("confirmPassword") String confirmPassword,
+            Model model) {
+        if (userService.findByEmail(user.getEmail()).isPresent()) {
+            model.addAttribute("erro", "Email já cadastrado.");
+            return "/login";
+        }
 
-    user.setPassword(passwordEncoder.encode(user.getPassword()));
-    userService.save(user);
-    return "index";
-}
+        if (!user.getPassword().equals(confirmPassword)) {
+            model.addAttribute("erro", "As senhas não conferem.");
+            return "/login";
+        }
+
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        userService.save(user);
+        return "index";
+    }
 
 }
