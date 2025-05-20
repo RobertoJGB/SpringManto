@@ -83,28 +83,11 @@ public class OrderController {
 
         shipmentService.saveShipment(shipment);
 
-        return "redirect:/orders/my-orders";
+        return "redirect:/user/profile";
     }
     
 
-    @GetMapping("/my-orders")
-    public String listUserOrders(Model model) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        String email = auth.getName(); // email do usuário logado
-
-        Optional<UserDomain> userOpt = userService.findByEmail(email);
-        if (userOpt.isEmpty()) {
-            return "redirect:/login";
-        }
-
-        UserDomain user = userOpt.get();
-
-        // buscando pelo buyer
-        List<Order> orders = orderService.findByBuyer(user);
-        model.addAttribute("orders", orders);
-
-        return "my-orders";
-    }
+ 
 
     
 
