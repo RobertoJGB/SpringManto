@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,154 +7,262 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
     <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --accent-color: #e74c3c;
+        }
+        
         body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: #f8f9fa;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
         }
+        
         .auth-container {
-            max-width: 800px;
-            border-radius: 10px;
-            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            max-width: 1000px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            overflow: hidden;
         }
-        .auth-form {
+        
+        .auth-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
             padding: 2rem;
-        }
-        .form-divider {
-            position: relative;
             text-align: center;
-            margin: 2rem 0;
         }
-        .form-divider::before {
-            content: "";
-            position: absolute;
-            top: 50%;
-            left: 0;
-            right: 0;
-            height: 1px;
-            background-color: #dee2e6;
-            z-index: 1;
+        
+        .auth-form {
+            padding: 2.5rem;
         }
-        .form-divider span {
-            position: relative;
-            z-index: 2;
-            background-color: #f8f9fa;
-            padding: 0 1rem;
+        
+        .form-control {
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            border: 1px solid #ced4da;
         }
-        .role-selector .form-check-input {
-            cursor: pointer;
+        
+        .form-control:focus {
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 0 0.25rem rgba(52, 152, 219, 0.25);
         }
-        .role-selector .form-check-label {
-            cursor: pointer;
-            padding: 0.5rem;
-            border-radius: 5px;
+        
+        .btn-auth {
+            padding: 0.75rem;
+            border-radius: 8px;
+            font-weight: 600;
             transition: all 0.3s;
         }
+        
+        .btn-login {
+            background-color: var(--secondary-color);
+            border-color: var(--secondary-color);
+        }
+        
+        .btn-login:hover {
+            background-color: #2980b9;
+            border-color: #2980b9;
+        }
+        
+        .btn-register {
+            background-color: #2ecc71;
+            border-color: #2ecc71;
+        }
+        
+        .btn-register:hover {
+            background-color: #27ae60;
+            border-color: #27ae60;
+        }
+        
+        .role-selector .form-check-input {
+            width: 1.2em;
+            height: 1.2em;
+            margin-top: 0.2em;
+        }
+        
+        .role-selector .form-check-label {
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
+            width: 100%;
+            transition: all 0.3s;
+        }
+        
         .role-selector .form-check-input:checked + .form-check-label {
-            background-color: #e9f5ff;
-            font-weight: 500;
+            background-color: #e3f2fd;
+            border-color: var(--secondary-color);
+        }
+        
+        .divider {
+            display: flex;
+            align-items: center;
+            text-align: center;
+            margin: 1.5rem 0;
+            color: #6c757d;
+        }
+        
+        .divider::before,
+        .divider::after {
+            content: "";
+            flex: 1;
+            border-bottom: 1px solid #dee2e6;
+        }
+        
+        .divider::before {
+            margin-right: 1rem;
+        }
+        
+        .divider::after {
+            margin-left: 1rem;
         }
     </style>
 </head>
 
 <body>
-<div class="container py-5">
-    <!-- Botão Voltar -->
-    <div class="mb-4">
-        <a href="/" class="btn btn-outline-primary">
-            <i class="bi bi-arrow-left"></i> Voltar à loja
-        </a>
-    </div>
-
-    <!-- Container principal -->
-    <div class="auth-container bg-white mx-auto">
-        <!-- Mensagens de erro -->
-        <div th:if="${erro}" class="alert alert-danger alert-dismissible fade show" role="alert">
-            <span th:text="${erro}"></span>
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-
-        <div class="row">
-            <!-- Seção de Login -->
-            <div class="col-md-6 border-end">
-                <div class="auth-form">
-                    <h2 class="mb-4 text-center">Entrar</h2>
-                    <form th:action="@{/login}" method="post">
-                        <div class="mb-3">
-                            <label for="loginEmail" class="form-label">Email</label>
-                            <input type="email" class="form-control" id="loginEmail" name="username" placeholder="seu@email.com" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="loginPassword" class="form-label">Senha</label>
-                            <input type="password" class="form-control" id="loginPassword" name="password" placeholder="Sua senha" required>
-                        </div>
-                        <div class="d-grid">
-                            <button type="submit" class="btn btn-primary">
-                                <i class="bi bi-box-arrow-in-right"></i> Entrar
-                            </button>
-                        </div>
-                    </form>
+    <div class="container my-auto py-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <!-- Botão Voltar -->
+                <div class="mb-4">
+                    <a href="/" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-left"></i> Voltar à loja
+                    </a>
                 </div>
-            </div>
 
-            <!-- Seção de Cadastro -->
-            <div class="col-md-6">
-                <div class="auth-form">
-                    <h2 class="mb-4 text-center">Cadastrar</h2>
-                    <form th:action="@{/cadastro}" method="post">
-                        <div class="mb-3">
-                            <label for="name" class="form-label">Nome Completo</label>
-                            <input type="text" class="form-control" id="name" name="name" placeholder="Seu nome" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="email" class="form-label">Email</label>
-                            <input type="email" class="form-control" id="email" name="email" placeholder="seu@email.com" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="password" class="form-label">Senha</label>
-                            <input type="password" class="form-control" id="password" name="password" placeholder="Crie uma senha" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="confirmPassword" class="form-label">Confirmar Senha</label>
-                            <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" placeholder="Repita sua senha" required>
-                        </div>
-
-                        <div class="mb-4">
-                            <label class="form-label">Tipo de Conta</label>
-                            <div class="role-selector d-flex gap-2">
-                                <div class="form-check flex-grow-1">
-                                    <input class="form-check-input" type="radio" name="userRole" id="roleBuyer" value="ROLE_BUYER" checked>
-                                    <label class="form-check-label w-100 text-center" for="roleBuyer">
-                                        <i class="bi bi-cart"></i> Comprador
-                                    </label>
+                <!-- Container principal -->
+                <div class="auth-container bg-white">
+                    <div class="auth-header">
+                        <h2><i class="bi bi-shop"></i> The Manto</h2>
+                        <p class="mb-0">Acesse sua conta ou cadastre-se</p>
+                    </div>
+                    
+                    <div class="row g-0">
+                        <!-- Seção de Login -->
+                        <div class="col-lg-6 border-end">
+                            <div class="auth-form">
+                                <h3 class="mb-4">Entrar</h3>
+                                
+                                <!-- Mensagens de erro -->
+                                <div th:if="${erro}" class="alert alert-danger alert-dismissible fade show">
+                                    <i class="bi bi-exclamation-triangle"></i> <span th:text="${erro}"></span>
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                                 </div>
-                                <div class="form-check flex-grow-1">
-                                    <input class="form-check-input" type="radio" name="userRole" id="roleSeller" value="ROLE_SELLER">
-                                    <label class="form-check-label w-100 text-center" for="roleSeller">
-                                        <i class="bi bi-shop"></i> Vendedor
-                                    </label>
-                                </div>
+                                
+                                <form th:action="@{/login}" method="post">
+                                    <div class="mb-3">
+                                        <label for="loginEmail" class="form-label">Email</label>
+                                        <input type="email" class="form-control" id="loginEmail" name="username" 
+                                               placeholder="seu@email.com" required>
+                                    </div>
+                                    <div class="mb-4">
+                                        <label for="loginPassword" class="form-label">Senha</label>
+                                        <input type="password" class="form-control" id="loginPassword" name="password" 
+                                               placeholder="Sua senha" required>
+                                    </div>
+                                    <div class="d-grid">
+                                        <button type="submit" class="btn btn-login btn-auth text-white">
+                                            <i class="bi bi-box-arrow-in-right"></i> Entrar
+                                        </button>
+                                    </div>
+                                </form>
                             </div>
                         </div>
 
-                        <div class="d-grid">
-                            <button type="submit" class="btn btn-success">
-                                <i class="bi bi-person-plus"></i> Criar conta
-                            </button>
+                        <!-- Seção de Cadastro -->
+                        <div class="col-lg-6">
+                            <div class="auth-form">
+                                <h3 class="mb-4">Cadastrar</h3>
+                                
+                                <form th:action="@{/cadastro}" method="post">
+                                    <div class="mb-3">
+                                        <label for="name" class="form-label">Nome Completo</label>
+                                        <input type="text" class="form-control" id="name" name="name" 
+                                               placeholder="Seu nome" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="email" class="form-label">Email</label>
+                                        <input type="email" class="form-control" id="email" name="email" 
+                                               placeholder="seu@email.com" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="password" class="form-label">Senha</label>
+                                        <input type="password" class="form-control" id="password" name="password" 
+                                               placeholder="Crie uma senha" required>
+                                    </div>
+                                    <div class="mb-4">
+                                        <label for="confirmPassword" class="form-label">Confirmar Senha</label>
+                                        <input type="password" class="form-control" id="confirmPassword" 
+                                               name="confirmPassword" placeholder="Repita sua senha" required>
+                                    </div>
+
+                                    <div class="mb-4">
+                                        <label class="form-label">Tipo de Conta</label>
+                                        <div class="role-selector d-flex gap-3">
+                                            <div class="form-check flex-grow-1">
+                                                <input class="form-check-input" type="radio" name="userRole" 
+                                                       id="roleBuyer" value="ROLE_BUYER" checked>
+                                                <label class="form-check-label" for="roleBuyer">
+                                                    <i class="bi bi-cart"></i> Comprador
+                                                </label>
+                                            </div>
+                                            <div class="form-check flex-grow-1">
+                                                <input class="form-check-input" type="radio" name="userRole" 
+                                                       id="roleSeller" value="ROLE_SELLER">
+                                                <label class="form-check-label" for="roleSeller">
+                                                    <i class="bi bi-shop"></i> Vendedor
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="d-grid">
+                                        <button type="submit" class="btn btn-register btn-auth text-white">
+                                            <i class="bi bi-person-plus"></i> Criar conta
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
                         </div>
-                    </form>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
 
-<!-- Rodapé -->
-<footer class="bg-dark text-white py-3 mt-5">
-    <div class="container text-center">
-        <p class="mb-0">© 2025 The Manto - Todos os direitos reservados</p>
-    </div>
-</footer>
+    <!-- Rodapé -->
+    <footer class="bg-dark text-white py-4 mt-auto">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5><i class="bi bi-shop"></i> The Manto</h5>
+                    <p>O melhor marketplace para comprar e vender produtos usados.</p>
+                </div>
+                <div class="col-md-3">
+                    <h5>Links Rápidos</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="/" class="text-white">Início</a></li>
+                        <li><a href="/login" class="text-white">Login</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-3">
+                    <h5>Contato</h5>
+                    <ul class="list-unstyled">
+                        <li><i class="bi bi-envelope"></i> contato@themanto.com</li>
+                        <li><i class="bi bi-telephone"></i> (11) 99999-9999</li>
+                    </ul>
+                </div>
+            </div>
+            <hr class="my-4 bg-light">
+            <div class="text-center">
+                <p class="mb-0">© 2025 The Manto - Todos os direitos reservados</p>
+            </div>
+        </div>
+    </footer>
 
-<!-- Scripts -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

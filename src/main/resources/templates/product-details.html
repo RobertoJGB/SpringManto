@@ -8,13 +8,52 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
     <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --accent-color: #e74c3c;
+        }
+
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #333;
+        }
+
         .product-img {
             max-height: 400px;
             object-fit: contain;
         }
 
-        .action-buttons {
-            margin-bottom: 20px;
+        .card {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-title {
+            font-size: 1.75rem;
+            font-weight: bold;
+        }
+
+        .price {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--accent-color);
+        }
+
+        .btn-custom {
+            border-radius: 50px;
+            font-weight: 600;
+        }
+
+        .btn-success {
+            background-color: var(--secondary-color);
+            border-color: var(--secondary-color);
+        }
+
+        .btn-success:hover {
+            background-color: #2980b9;
         }
 
         .modal {
@@ -32,10 +71,9 @@
             background-color: #fff;
             margin: 5% auto;
             padding: 25px;
-            border-radius: 8px;
+            border-radius: 10px;
             width: 90%;
             max-width: 600px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
         }
 
         .modal-header {
@@ -55,38 +93,44 @@
         .close:hover {
             color: #333;
         }
+
+        footer {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 2rem 0;
+            margin-top: 3rem;
+        }
     </style>
 </head>
 
-<body class="bg-light">
+<body>
     <div class="container py-4">
-        <!-- Ações no topo -->
-        <div class="action-buttons d-flex gap-2">
-            <a href="/user/profile" class="btn btn-outline-secondary" sec:authorize="isAuthenticated()">
+        <!-- Botões superiores -->
+        <div class="d-flex justify-content-start gap-2 mb-4">
+            <a href="/user/profile" class="btn btn-outline-secondary btn-custom" sec:authorize="isAuthenticated()">
                 <i class="bi bi-person"></i> Meu Perfil
             </a>
-            <a href="/" class="btn btn-outline-primary">
+            <a href="/" class="btn btn-outline-primary btn-custom">
                 <i class="bi bi-arrow-left"></i> Voltar à loja
             </a>
         </div>
 
-        <!-- Card do produto -->
-        <div class="card mb-4 shadow-sm">
+        <!-- Card do Produto -->
+        <div class="card mb-4">
             <div class="row g-0">
                 <div class="col-md-6 text-center p-3 bg-light">
                     <img th:src="${product.imageUrl}" alt="Imagem do Produto" class="img-fluid product-img"
-                        onerror="this.src='/img/placeholder-product.png'">
+                         onerror="this.src='/img/placeholder-product.png'">
                 </div>
                 <div class="col-md-6">
                     <div class="card-body">
                         <h2 class="card-title" th:text="${product.nameProduct}"></h2>
                         <p class="card-text text-muted" th:text="${product.description}"></p>
-
                         <div class="d-flex justify-content-between align-items-center mt-4">
-                            <h4 class="text-success mb-0">
+                            <div class="price">
                                 R$ <span th:text="${#numbers.formatDecimal(product.price, 1, 2, 'COMMA')}"></span>
-                            </h4>
-                            <span class="badge bg-primary">
+                            </div>
+                            <span class="badge bg-primary fs-6">
                                 Disponível: <span th:text="${product.quantity}"></span>
                             </span>
                         </div>
@@ -95,21 +139,18 @@
             </div>
         </div>
 
-
-        <!-- Formulário de compra -->
-        <div class="card p-4 mb-4 shadow-sm">
-            <h4 class="mb-3">Comprar este produto</h4>
+        <!-- Formulário de Compra -->
+        <div class="card p-4 mb-4">
+            <h4 class="mb-3 fw-bold">Comprar este produto</h4>
             <form th:action="@{/orders/create}" method="post" class="row g-3 align-items-end">
                 <input type="hidden" name="productId" th:value="${product.id}" />
-
                 <div class="col-auto">
                     <label for="quantity" class="form-label">Quantidade:</label>
                     <input type="number" id="quantity" name="quantity" class="form-control" value="1" min="1"
-                        th:attr="max=${product.quantity}" required />
+                           th:attr="max=${product.quantity}" required />
                 </div>
-
                 <div class="col-auto">
-                    <button type="submit" class="btn btn-success mt-3">
+                    <button type="submit" class="btn btn-success mt-3 btn-custom">
                         <i class="bi bi-cart-check"></i> Comprar agora
                     </button>
                 </div>
@@ -118,7 +159,7 @@
 
         <!-- Avaliações -->
         <div class="mb-4">
-            <h2 class="mb-3">Avaliações</h2>
+            <h2 class="mb-3 fw-bold">Avaliações</h2>
 
             <div th:if="${#lists.isEmpty(reviews)}">
                 <p class="text-muted">Este produto ainda não possui avaliações.</p>
@@ -131,9 +172,8 @@
                 </li>
             </ul>
 
-            <!-- Botão que abre o modal -->
             <div sec:authorize="isAuthenticated()">
-                <button onclick="openReviewModal()" class="btn btn-success">
+                <button onclick="openReviewModal()" class="btn btn-success btn-custom">
                     <i class="bi bi-chat-dots"></i> Adicionar Avaliação
                 </button>
             </div>
@@ -148,23 +188,19 @@
                     <div class="modal-body">
                         <form th:action="@{/reviews/create}" method="post">
                             <input type="hidden" name="productId" th:value="${product.id}" />
-
                             <div class="mb-3">
                                 <label for="rating" class="form-label">Nota (1 a 5):</label>
-                                <input type="number" name="rating" id="rating" class="form-control" min="1" max="5"
-                                    required />
+                                <input type="number" name="rating" id="rating" class="form-control" min="1" max="5" required />
                             </div>
-
                             <div class="mb-3">
                                 <label for="comment" class="form-label">Comentário:</label>
-                                <textarea name="comment" id="comment" class="form-control" required rows="4"></textarea>
+                                <textarea name="comment" id="comment" class="form-control" rows="4" required></textarea>
                             </div>
-
                             <div class="d-grid gap-2">
-                                <button type="submit" class="btn btn-primary">
+                                <button type="submit" class="btn btn-primary btn-custom">
                                     <i class="bi bi-send"></i> Enviar Avaliação
                                 </button>
-                                <button type="button" class="btn btn-outline-secondary" onclick="closeReviewModal()">
+                                <button type="button" class="btn btn-outline-secondary btn-custom" onclick="closeReviewModal()">
                                     Cancelar
                                 </button>
                             </div>
@@ -173,43 +209,61 @@
                 </div>
             </div>
 
-
-
-
-
-            <!-- Link de volta -->
-            <a th:href="@{/user/profile}" class="btn btn-outline-secondary">
+            <a th:href="@{/user/profile}" class="btn btn-outline-secondary mt-3 btn-custom">
                 <i class="bi bi-arrow-left"></i> Voltar ao perfil
             </a>
         </div>
+    </div>
 
-        <!-- Rodapé igual às outras páginas -->
-        <footer class="bg-dark text-white py-4 mt-5">
-            <div class="container text-center">
+    <!-- Rodapé -->
+    <footer>
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5><i class="bi bi-shop"></i> The Manto</h5>
+                    <p>O melhor marketplace para comprar e vender produtos usados.</p>
+                </div>
+                <div class="col-md-3">
+                    <h5>Links Rápidos</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="/" class="text-white">Início</a></li>
+                        <li><a href="/login" class="text-white">Login</a></li>
+                        <li><a href="/user/profile" class="text-white" sec:authorize="isAuthenticated()">Meu Perfil</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-3">
+                    <h5>Contato</h5>
+                    <ul class="list-unstyled">
+                        <li><i class="bi bi-envelope"></i> contato@themanto.com</li>
+                        <li><i class="bi bi-telephone"></i> (11) 99999-9999</li>
+                    </ul>
+                </div>
+            </div>
+            <hr class="my-4 bg-light">
+            <div class="text-center">
                 <p class="mb-0">© 2025 The Manto - Todos os direitos reservados</p>
             </div>
-        </footer>
+        </div>
+    </footer>
 
-        <!-- Scripts -->
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-        <script>
-            function openReviewModal() {
-                document.getElementById('reviewModal').style.display = 'block';
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function openReviewModal() {
+            document.getElementById('reviewModal').style.display = 'block';
+        }
+
+        function closeReviewModal() {
+            document.getElementById('reviewModal').style.display = 'none';
+        }
+
+        window.onclick = function (event) {
+            const modal = document.getElementById('reviewModal');
+            if (event.target === modal) {
+                modal.style.display = "none";
             }
-
-            function closeReviewModal() {
-                document.getElementById('reviewModal').style.display = 'none';
-            }
-
-            // Fechar modal ao clicar fora dele
-            window.onclick = function (event) {
-                const modal = document.getElementById('reviewModal');
-                if (event.target === modal) {
-                    modal.style.display = "none";
-                }
-            }
-        </script>
-
+        }
+    </script>
 </body>
 
 </html>
